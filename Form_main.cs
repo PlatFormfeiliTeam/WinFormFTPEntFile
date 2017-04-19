@@ -50,13 +50,28 @@ namespace WinFormFTPEntFile
                 {
                     int id = Convert.ToInt32(row.Cells["ID"].Value.ToString());
                     row.Cells["STATUSFLAG"].Value = "运行中";
-                    ftpItem ftpitem= getItem(id);
-                    ftpitem.Statusflag = true;
-                    ftpItems.Add(ftpitem);
+
+                    ftpItem item = ftpItems.Find(finditem =>
+                    {
+                        if (finditem.ID == id)
+                        {
+                            finditem.Statusflag = true;
+                            return true;
+                        }
+                        return false;
+                    });
+
+
                     //暂时不开线程
-                    //Thread myThread = new Thread(new ParameterizedThreadStart(s));
-                    //myThread.IsBackground = true;
-                    //myThread.Start(ftpitem);
+                    if (item==null)
+                    {
+                            item = getItem(id);
+                            item.Statusflag = true;
+                            ftpItems.Add(item);
+                    }
+                    Thread myThread = new Thread(new ParameterizedThreadStart(s));
+                    myThread.IsBackground = true;
+                    myThread.Start(item);
 
                     row.Cells["Column_check"].Value = false;
                 }
@@ -115,7 +130,8 @@ namespace WinFormFTPEntFile
                 System.Timers.Timer t = (System.Timers.Timer)sender;//当前的计时器
                 //进入先关闭
                 t.Stop();
-
+                i++;
+                this.txt_templetename.Text = i.ToString();
                 if (!item.Statusflag)//标志是否关闭
                 {   
                     t.Stop();
@@ -149,10 +165,11 @@ namespace WinFormFTPEntFile
             string enterprisecode = this.txt_enterprisecode.Text.Trim();
             string enterprisename = this.txt_enterprisename.Text.Trim();
             string templetename = this.txt_templetename.Text.Trim();
+            string rediskey = this.txt_key.Text.Trim();
 
-            string sql_add = @"insert into CONFIG_FTPFILE (id,address,username,pswd,reciveunitcode,reciveunitname,declareunitcode,declareunitname,enterprisecode,enterprisename,templetename)
-                               values(CONFIG_FTPFILE_ID.Nextval,'{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}')";
-            sql_add = string.Format(sql_add, address, username, password, reciveunitcode, reciveunitname, declareunitcode, declareunitname, enterprisecode, enterprisename, templetename);
+            string sql_add = @"insert into CONFIG_FTPFILE (id,address,username,pswd,reciveunitcode,reciveunitname,declareunitcode,declareunitname,enterprisecode,enterprisename,templetename,rediskey)
+                               values(CONFIG_FTPFILE_ID.Nextval,'{0}','{1}','{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}')";
+            sql_add = string.Format(sql_add, address, username, password, reciveunitcode, reciveunitname, declareunitcode, declareunitname, enterprisecode, enterprisename, templetename, rediskey);
             DBMgr.ExecuteNonQuery(sql_add);
             foreach (Control ctr in this.Controls)
             {
@@ -189,7 +206,7 @@ namespace WinFormFTPEntFile
         private void bindData()
         {
             string sql_bind =@"select '停止' STATUSFLAG,ID,ADDRESS,USERNAME,PSWD,RECIVEUNITCODE,RECIVEUNITNAME,DECLAREUNITCODE,
-                               DECLAREUNITNAME,ENTERPRISECODE,DECLAREUNITNAME,ENTERPRISECODE,ENTERPRISENAME,TEMPLETENAME from CONFIG_FTPFILE";
+                               DECLAREUNITNAME,ENTERPRISECODE,DECLAREUNITNAME,ENTERPRISECODE,ENTERPRISENAME,TEMPLETENAME,REDISKEY from CONFIG_FTPFILE";
             DataTable dt_bind = DBMgr.GetDataTable(sql_bind);
             this.gr_ftpitem.DataSource = dt_bind;
             this.gr_ftpitem.Columns["STATUSFLAG"].HeaderText = "服务状态";
@@ -204,6 +221,7 @@ namespace WinFormFTPEntFile
             this.gr_ftpitem.Columns["ENTERPRISECODE"].HeaderText = "委托企业代码";
             this.gr_ftpitem.Columns["ENTERPRISENAME"].HeaderText = "委托企业名称";
             this.gr_ftpitem.Columns["TEMPLETENAME"].HeaderText = "模板名";
+            this.gr_ftpitem.Columns["REDISKEY"].HeaderText = "REDISKEY";
             
         }
 
@@ -293,8 +311,6 @@ namespace WinFormFTPEntFile
 
         private void getFtpFile(ftpItem item,FtpHelper ftp)
         {
-            
-
                 try
                 {
                     string destination = DateTime.Now.ToString("yyyy-MM-dd");
@@ -409,30 +425,35 @@ namespace WinFormFTPEntFile
             #region
             try
             {
-                string enterprisecode = string.Empty;
-                string enterprisename = string.Empty;
+                string enterprisecode = item.ENTERPRISECODE;
+                string enterprisename = item.ENTERPRISENAME;
                 string prefix = fs.Name.Substring(0, 3);
                 string entid = string.Empty;
-                if (prefix == "E1P" || prefix == "E1B" || prefix == "IMP" || prefix == "IMB")
+                //判断是否仁宝,仁宝的委托企业字段直接放空
+                if (item.ENTERPRISECODE=="")
                 {
-                    enterprisecode = "3223640003";//海关10位编码  空运出口
-                    enterprisename = "仁宝电子科技(昆山)有限公司";
+                    if (prefix == "E1P" || prefix == "E1B" || prefix == "IMP" || prefix == "IMB")
+                    {
+                        enterprisecode = "3223640003";//海关10位编码  空运出口
+                        enterprisename = "仁宝电子科技(昆山)有限公司";
+                    }
+                    if (prefix == "E1W" || prefix == "E2W" || prefix == "E1D" || prefix == "E2D" || prefix == "E7D" || prefix == "IMW" || prefix == "IMD" || prefix == "LMW" || prefix == "LMD" || prefix == "IAD" || prefix == "IEW" || prefix == "IED" || prefix == "E7W" || prefix == "LDD" || prefix == "LGW" || prefix == "LGD" || prefix == "LDW")
+                    {
+                        enterprisecode = "3223640047";
+                        enterprisename = "仁宝信息技术(昆山)有限公司";
+                    }
+                    if (prefix == "E1C" || prefix == "E1Q" || prefix == "E1O" || prefix == "IMQ" || prefix == "IMC" || prefix == "E2Q" || prefix == "E2C" || prefix == "LGC")
+                    {
+                        enterprisecode = "3223640038";
+                        enterprisename = "仁宝资讯工业(昆山)有限公司";
+                    }
+                    if (prefix == "IVS" || prefix == "EAS")
+                    {
+                        enterprisecode = "3223660037";
+                        enterprisename = "昆山柏泰电子技术服务有限公司";
+                    } 
                 }
-                if (prefix == "E1W" || prefix == "E2W" || prefix == "E1D" || prefix == "E2D" || prefix == "E7D" || prefix == "IMW" || prefix == "IMD" || prefix == "LMW" || prefix == "LMD" || prefix == "IAD" || prefix == "IEW" || prefix == "IED" || prefix == "E7W" || prefix == "LDD" || prefix == "LGW" || prefix == "LGD" || prefix == "LDW")
-                {
-                    enterprisecode = "3223640047";
-                    enterprisename = "仁宝信息技术(昆山)有限公司";
-                }
-                if (prefix == "E1C" || prefix == "E1Q" || prefix == "E1O" || prefix == "IMQ" || prefix == "IMC" || prefix == "E2Q" || prefix == "E2C" || prefix == "LGC")
-                {
-                    enterprisecode = "3223640038";
-                    enterprisename = "仁宝资讯工业(昆山)有限公司";
-                }
-                if (prefix == "IVS" || prefix == "EAS")
-                {
-                    enterprisecode = "3223660037";
-                    enterprisename = "昆山柏泰电子技术服务有限公司";
-                }
+               
                 //code是企业编号 仁宝格式 E1Q1603927_sheet.txt 
                 int start = fs.Name.LastIndexOf("_");
                 int end = fs.Name.LastIndexOf(".");
@@ -457,7 +478,7 @@ namespace WinFormFTPEntFile
                         filetypeid = 50;
                         break;
                 }
-                sql = "select * from ent_order where code='" + contractno + "'";
+                sql = "select * from ent_order where code='" + contractno + "' and ENTERPRISECODE='" + enterprisecode + "'";
                 DataTable dt_ent = DBMgr.GetDataTable(sql);
                 if (dt_ent.Rows.Count == 0)
                 {
@@ -488,7 +509,10 @@ namespace WinFormFTPEntFile
                 int result = DBMgr.ExecuteNonQuery(sql);
                 if (result > 0 && fs.Name.IndexOf(".txt") > 0)
                 {
-                    db.ListRightPush("compal_sheet_topdf_queen", "{ENTID:'" + entid + "',FILENAME:" + "'/" + directory + "/" + fs.Name + "'}");//保存随附文件ID到队列
+                    //key应该根据不同公司生成不同的key
+                    string keyname = item.REDISKEY;
+                    //db.ListRightPush("compal_sheet_topdf_queen", "{ENTID:'" + entid + "',FILENAME:" + "'/" + directory + "/" + fs.Name + "'}");//保存随附文件ID到队列
+                    db.ListRightPush(keyname, "{ENTID:'" + entid + "',FILENAME:" + "'/" + directory + "/" + fs.Name + "'}");//保存随附文件ID到队列
                 }
                 content = true;
             }

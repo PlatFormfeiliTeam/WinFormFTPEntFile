@@ -38,6 +38,7 @@
             this.lab_FILEDECLAREUNIT = new System.Windows.Forms.Label();
             this.lab_delegate = new System.Windows.Forms.Label();
             this.gr_ftpitem = new System.Windows.Forms.DataGridView();
+            this.Column_check = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.btn_add = new System.Windows.Forms.Button();
             this.btn_del = new System.Windows.Forms.Button();
             this.btn_sevice = new System.Windows.Forms.Button();
@@ -50,7 +51,8 @@
             this.txt_reciveunitcode = new System.Windows.Forms.TextBox();
             this.txt_reciveunitname = new System.Windows.Forms.TextBox();
             this.btn_close = new System.Windows.Forms.Button();
-            this.Column_check = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.txt_key = new System.Windows.Forms.TextBox();
+            this.lab_key = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.gr_ftpitem)).BeginInit();
             this.SuspendLayout();
             // 
@@ -141,9 +143,14 @@
             this.gr_ftpitem.TabIndex = 12;
             this.gr_ftpitem.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gr_ftpitem_CellContentClick);
             // 
+            // Column_check
+            // 
+            this.Column_check.HeaderText = "选择";
+            this.Column_check.Name = "Column_check";
+            // 
             // btn_add
             // 
-            this.btn_add.Location = new System.Drawing.Point(660, 650);
+            this.btn_add.Location = new System.Drawing.Point(660, 689);
             this.btn_add.Name = "btn_add";
             this.btn_add.Size = new System.Drawing.Size(75, 23);
             this.btn_add.TabIndex = 13;
@@ -153,7 +160,7 @@
             // 
             // btn_del
             // 
-            this.btn_del.Location = new System.Drawing.Point(750, 650);
+            this.btn_del.Location = new System.Drawing.Point(750, 689);
             this.btn_del.Name = "btn_del";
             this.btn_del.Size = new System.Drawing.Size(75, 23);
             this.btn_del.TabIndex = 14;
@@ -241,16 +248,27 @@
             this.btn_close.UseVisualStyleBackColor = true;
             this.btn_close.Click += new System.EventHandler(this.btn_close_Click);
             // 
-            // Column_check
+            // txt_key
             // 
-            this.Column_check.HeaderText = "选择";
-            this.Column_check.Name = "Column_check";
+            this.txt_key.Location = new System.Drawing.Point(100, 651);
+            this.txt_key.Name = "txt_key";
+            this.txt_key.Size = new System.Drawing.Size(726, 21);
+            this.txt_key.TabIndex = 16;
+            // 
+            // lab_key
+            // 
+            this.lab_key.AutoSize = true;
+            this.lab_key.Location = new System.Drawing.Point(37, 654);
+            this.lab_key.Name = "lab_key";
+            this.lab_key.Size = new System.Drawing.Size(59, 12);
+            this.lab_key.TabIndex = 17;
+            this.lab_key.Text = "缓存KEY：";
             // 
             // Form_main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(836, 681);
+            this.ClientSize = new System.Drawing.Size(836, 730);
             this.Controls.Add(this.btn_close);
             this.Controls.Add(this.txt_enterprisename);
             this.Controls.Add(this.txt_reciveunitname);
@@ -258,7 +276,9 @@
             this.Controls.Add(this.txt_declareunitname);
             this.Controls.Add(this.txt_declareunitcode);
             this.Controls.Add(this.label3);
+            this.Controls.Add(this.lab_key);
             this.Controls.Add(this.lab_templete);
+            this.Controls.Add(this.txt_key);
             this.Controls.Add(this.txt_templetename);
             this.Controls.Add(this.btn_sevice);
             this.Controls.Add(this.btn_del);
@@ -310,6 +330,8 @@
         private System.Windows.Forms.TextBox txt_reciveunitname;
         private System.Windows.Forms.Button btn_close;
         private System.Windows.Forms.DataGridViewCheckBoxColumn Column_check;
+        private System.Windows.Forms.TextBox txt_key;
+        private System.Windows.Forms.Label lab_key;
     }
 }
 

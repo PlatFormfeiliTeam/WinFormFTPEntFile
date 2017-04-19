@@ -480,6 +480,35 @@ namespace Common
             }
             return list;
         }
+
+        public List<FileStruct> GetFileList(string direcotry)
+        {
+            List<FileStruct> list = new List<FileStruct>();
+            try
+            {
+                string str = null;
+                //WebRequestMethods.Ftp.ListDirectoryDetails可以列出所有的文件和目录列表
+                //WebRequestMethods.Ftp.ListDirectory只能列出目录的文件列表
+                FtpWebResponse response = CreateResponse(new Uri(this.Uri.ToString() + direcotry), WebRequestMethods.Ftp.ListDirectory);
+                Stream stream = response.GetResponseStream();
+
+                using (StreamReader sr = new StreamReader(stream, this.Encode))
+                {
+                    str = sr.ReadToEnd();
+                }
+                string[] fileList = str.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                EFileListFormat format = JudgeFileListFormat(fileList);
+                if (!string.IsNullOrEmpty(str) && format != EFileListFormat.Unknown)
+                {
+                    list = ParseFileStruct(fileList, format);
+                }
+            }
+            catch (WebException ex)
+            {
+                //throw ex;
+            }
+            return list;
+        }
         /// <summary>
         /// 解析文件列表信息返回文件列表
         /// </summary>

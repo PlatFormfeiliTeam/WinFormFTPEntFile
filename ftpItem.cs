@@ -94,6 +94,12 @@ namespace WinFormFTPEntFile
             get { return templetename; }
             set { templetename = value; }
         }
+        private string rediskey;
+        public string REDISKEY
+        {
+            get { return rediskey; }
+            set { rediskey=value;}
+        }
         public ftpItem(int id, string address, string username, string password, string reciveunitcode,string reciveunitname,
             string declareunitcode, string declareunitname, string enterprisecode,string enterprisename,string templetename,bool statusflag)
         {
